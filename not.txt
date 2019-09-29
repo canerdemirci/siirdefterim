@@ -1,0 +1,17 @@
+api key
+AIzaSyBAI81Fw7WChg_KxvUKZ_pWzzBhpLgN8fU
+
+Veritabanı tasarımı:
+
+siir tablosu
+=========================================
+id int primary auto_inc
+ad varchar(150)
+metin text
+sair_id int foreign key
+created_at Datetime default timestamp
+
+sair tablosu
+=========================================
+id int primary auto_inc
+ad varchar(100)
