@@ -1,0 +1,5 @@
+enum FILTRELER {
+  SAIRADI,
+  TARIH,
+  HEPSI,
+}

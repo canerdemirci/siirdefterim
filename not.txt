@@ -15,3 +15,5 @@ sair tablosu
 =========================================
 id int primary auto_inc
 ad varchar(100)
+
+** Veritabanı google drive a yedekleme ve geri yükleme işlemleri.
