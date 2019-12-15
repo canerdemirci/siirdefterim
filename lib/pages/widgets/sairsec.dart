@@ -1,7 +1,12 @@
+/*
+** Şair seçme kutusu
+*/
+
 import 'package:flutter/material.dart';
 import '../../database/Sair.dart';
 
 class SairSec extends StatefulWidget {
+  
   final List<Sair> data;
   final Function onChanged;
   final int value;

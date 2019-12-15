@@ -82,24 +82,21 @@ class SiirProvider {
   ** Bazı kriterlere göre vt'den şiirleri ve sorgudan dönen satır sayısını çeker ve
   ** Map nesnesi olarak döndürür.
   */
-  Future<Map<String, dynamic>> siirler(int limit, int sairid, String aranacak, FILTRELER order) async {
+  Future<List<Siir>> siirler(int limit, int offset, int sairid, String aranacak, FILTRELER order) async {
     
     final db = await _vt.database;
     
     // Sql şartları için.
     String whereClause = '';
-    String orderBy = '';
+    String orderBy = 'ORDER BY ${Siir.tableName}.${Siir.colCreatedat} DESC';
     String limitClause = '';
 
     // Dönecek olan şiir satırları için
     List<Map> maps;
 
-    // Sorgudan dönen satır sayısı
-    int siirsayisi = 0;
-
     // limit verilmişse sql 'e limit ifadesi ekle
     if (limit != null) {
-      limitClause = 'LIMIT $limit OFFSET 0';
+      limitClause = 'LIMIT $limit OFFSET $offset';
     }
 
     // Bir şair id'si verilmişse sql'e where koşulu ekle.
@@ -118,7 +115,7 @@ class SiirProvider {
     // HEPSI filtresi seçilmişse where ifadesini boş tut, böylece tüm satırları çek.
     if (order == FILTRELER.HEPSI) whereClause = '';
     if (order == FILTRELER.TARIH) orderBy = 'ORDER BY ${Siir.tableName}.${Siir.colCreatedat} DESC';
-    if (order == FILTRELER.SAIRADI) orderBy = 'ORDER BY ${Siir.tableName}.${Siir.colAd} ASC';
+    if (order == FILTRELER.ALFABETIK) orderBy = 'ORDER BY ${Siir.tableName}.${Siir.colAd} ASC';
 
     // Veritabanına yollanacak sql ifadesi.
     // siir ve sair tablosunu birleştirerek sonuç döndürür.
@@ -137,37 +134,17 @@ class SiirProvider {
       $limitClause
     ''';
 
-    // İlk sql ifadesine benzer sadece satır sayısını döndürür.
-    // Ayrı bir ifade yapmamın sebebi ilk sorguda limit kullanılıyor bu yüzden toplam şiir sayısını vermez.
-    String sql2 = '''SELECT COUNT(*) FROM ${Siir.tableName} INNER JOIN ${Sair.tableName} on 
-    ${Sair.tableName}.${Sair.colId}=${Siir.tableName}.${Siir.colSairid} $whereClause''';
-
-    // Veritabanındaki şiirleri ve toplam şiir sayısını çeker.
-    // transaction başarısız olursa null döndürür.
-    try {
-      await db.transaction(
-        (txn) async {
-          // Query fonksiyonlarında bug olduğundan fazlaca if kullanmak zorunda kaldım.
-          if (whereClause != '' && sairid != null) {
-            maps = await txn.rawQuery(sql, [sairid]);
-            siirsayisi = Sqflite.firstIntValue(await txn.rawQuery(sql2, [sairid]));
-          } else {
-            maps = await txn.rawQuery(sql);
-            siirsayisi = Sqflite.firstIntValue(await txn.rawQuery(sql2));
-          }
-        }
-      );
-    } catch(ex) {
-      print(ex.toString());
-      return null;
+    // Veritabanındaki şiirleri çeker.
+    if (whereClause != '' && sairid != null) {
+      maps = await db.rawQuery(sql, [sairid]);
+    } else {
+      maps = await db.rawQuery(sql);
     }
+        
 
     // Vt'de şiir varsa şiir listesi ve şiir sayısını döndür.
     if (maps.length > 0) {
-      return {
-        'siirler': maps.map((siir) => Siir.fromMap(siir)).toList(),
-        'siirsayisi': siirsayisi,
-      };
+      return maps.map((siir) => Siir.fromMap(siir)).toList();
     }   
     
     return null;

@@ -72,18 +72,21 @@ class SiirGosterPage extends StatelessWidget {
           _controlledAnimation,
 
           Center(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  SizedBox(height: 40.0),
-                  Text(siir.ad, style: _tstyle('baslik')),
-                  SizedBox(height: 10.0),
-                  Text(siir.metin, style: _tstyle(null)),
-                  SizedBox(height: 10.0),
-                  Text(siir.sairad, style: _tstyle(null)),
-                  SizedBox(height: 40.0),
-                ],
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    SizedBox(height: 40.0),
+                    Text(siir.ad, style: _tstyle('baslik')),
+                    SizedBox(height: 10.0),
+                    Text(siir.metin, style: _tstyle(null)),
+                    SizedBox(height: 10.0),
+                    Text(siir.sairad, style: _tstyle(null)),
+                    SizedBox(height: 40.0),
+                  ],
+                ),
               ),
             ),
           ),

@@ -13,18 +13,28 @@ class SiireklePage extends StatefulWidget {
 class _SiireklePageState extends State<SiireklePage> {
   final _formKey = GlobalKey<FormState>();
   final _scfKey = GlobalKey<ScaffoldState>();
-  final _bosMsg = 'Bu alan boş bırakılamaz.';
-  final TextEditingController _sairAdiController = TextEditingController();
+
+  final String _bosMsg = 'Bu alan boş bırakılamaz.';
+  
+  // Siir ve sair tablolarında vt. işlemleri yapabilmek için
   final _sairProvider = SairProvider();
   final _siirProvider = SiirProvider();
-
+  
+  final TextEditingController _sairAdiController = TextEditingController();
   final TextEditingController _siirAdiController = TextEditingController();
   final TextEditingController _siirMetniController = TextEditingController();
 
+  // Şair listesi
   List<Sair> _sairler;
 
+  // Şiir kaydedilirken bu id ile hangi şaire ait olduğu bilinecek
   int _seciliSairId;
 
+  /*
+  ** Şairleri vt'den çeker ve _sairler listesine yükler.
+  ** _seciliSairId listenin ilk elemanı olur.
+  ** istenenid parametresi verilmişse _seciliSiirId ye geçirilir.
+  **/
   Future<void> _sairleriGetir(int istenenid) async {
     var s = await _sairProvider.sairler();
     setState(() {
@@ -36,6 +46,7 @@ class _SiireklePageState extends State<SiireklePage> {
     });
   }
 
+  // Şair seçme kutusu
   void _sairOnchanged(int val) {
     setState(() {
       _seciliSairId = val;
@@ -116,55 +127,56 @@ class _SiireklePageState extends State<SiireklePage> {
             SizedBox(height: 30.0),
 
             // Şair
-            _sairler == null ? 
-              Text('Hiç şair yok. Bir şair ekleyin.') : 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                _sairler == null ? 
+                Text('Hiç şair yok. Bir şair ekleyin.') : 
                   Expanded(flex: 9, child: SairSec(value: _seciliSairId, data: _sairler, onChanged: _sairOnchanged)),
-                  SizedBox(width: 5.0),
-                  Expanded(
-                    flex: 1,
-                    child: InkWell(
-                      child: Icon(Icons.add, size: 35.0, color: Colors.red[400]),
-                      onTap: () async {
-                        int id = await showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text('Şair Ekle'),
-                            content: TextField(
-                              decoration: InputDecoration(
-                                hintText: 'Şair adı giriniz.',
-                              ),
-                              maxLength: 100,
-                              controller: _sairAdiController,
+                SizedBox(width: 5.0),
+                Expanded(
+                  flex: 1,
+                  child: InkWell(
+                    child: Icon(Icons.add, size: 35.0, color: Colors.red[400]),
+                    onTap: () async {
+                      int id = await showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text('Şair Ekle'),
+                          content: TextField(
+                            decoration: InputDecoration(
+                              hintText: 'Şair adı giriniz.',
                             ),
-                            actions: <Widget>[
-                              FlatButton(
-                                child: Text('KAPAT'),
-                                onPressed: () => Navigator.pop(context),
-                              ),
-                              FlatButton(
-                                child: Text('KAYDET'),
-                                onPressed: () async {
-                                  String text = _sairAdiController.text.trim();
-                                  if (text.length > 0) {
-                                    Sair sair = await _sairProvider.insert(Sair(ad: basHarfleriBuyult(text)));
-                                    Navigator.pop(context, sair.id);
-                                  }
-                                },
-                              ),
-                            ],
-                          )
-                        );
+                            maxLength: 100,
+                            controller: _sairAdiController,
+                          ),
+                          actions: <Widget>[
+                            FlatButton(
+                              child: Text('KAPAT'),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                            FlatButton(
+                              child: Text('KAYDET'),
+                              onPressed: () async {
+                                String text = _sairAdiController.text.trim();
+                                if (text.length > 0) {
+                                  Sair sair = await _sairProvider.insert(Sair(ad: basHarfleriBuyult(text)));
+                                  Navigator.pop(context, sair.id);
+                                }
+                              },
+                            ),
+                          ],
+                        )
+                      );
 
-                        _sairleriGetir(id == null ? null : id);
-                      },
-                    ),
+                      // Yeni şair eklendikten sonra o şairin id si seçili olur.
+                      _sairleriGetir(id);
+                    },
                   ),
-                ],
-              ),
+                ),
+              ],
+            ),
 
             SizedBox(height: 30.0),
 

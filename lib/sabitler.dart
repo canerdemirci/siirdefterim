@@ -1,5 +1,5 @@
 enum FILTRELER {
-  SAIRADI,
+  ALFABETIK,
   TARIH,
   HEPSI,
 }
